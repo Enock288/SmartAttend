@@ -285,7 +285,8 @@
     </main>
 </div>
 
-<script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
+<script src="env-config.js"></script>
+<script>window.SMARTATTEND_API_URL = window.SMARTATTEND_API_URL || window.location.origin;</script>
 <script src="lecturer dashboard.js"></script>
 <script src="cyber-ui.js"></script>
 </body>

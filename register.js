@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('registerForm');
   const message = document.getElementById('registerMessage');
   const button = form?.querySelector('button[type="submit"]');
-  const API_URL = window.SMARTATTEND_API_URL || 'http://localhost:3001';
+  const API_URL = window.SMARTATTEND_API_URL || window.location.origin;
   form?.addEventListener('submit', async event => {
     event.preventDefault(); message.textContent = '';
     const password = document.getElementById('registerPassword').value;

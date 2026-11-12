@@ -15,7 +15,7 @@ The Java API listens on `http://localhost:3001`. To use it from the existing fro
 <script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
 ```
 
-The Node API remains available on port 3000 and serves the frontend. Use one backend at a time.
+The Node API remains available on port 3001 and serves the frontend. Use one backend at a time.
 
 Additional routes:
 

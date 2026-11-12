@@ -17,6 +17,7 @@
             <a href="#attendance" class="nav-link">▣ My Attendance</a>
             <a href="my-courses.html" class="nav-link">▤ My Courses</a>
             <a href="#profile" class="nav-link">♙ My Profile</a>
+            <a href="#attendance-records" class="nav-link">Attendance Records</a>
         </nav>
 
         <a href="login.html" class="logout-link">↪ Log Out</a>
@@ -214,6 +215,13 @@
     </div>
 </section>
 
+        <section class="panel" id="attendance-records">
+            <div class="panel-heading">
+                <div><p class="eyebrow">ATTENDANCE HISTORY</p><h2>My Attendance Records</h2></div>
+            </div>
+            <div class="table-wrapper"><table><thead><tr><th>Course</th><th>Session date</th><th>Session time</th><th>Recorded at</th><th>Status</th></tr></thead><tbody id="attendanceRecordsBody"><tr><td colspan="5">Loading attendance records...</td></tr></tbody></table></div>
+        </section>
+
         <section class="panel scan-panel" id="scan">
             <div>
                 <p class="eyebrow">SMART ATTENDANCE</p>
@@ -249,7 +257,8 @@
         </footer>
     </main>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
+    <script src="env-config.js"></script>
+    <script>window.SMARTATTEND_API_URL = window.SMARTATTEND_API_URL || window.location.origin;</script>
     <script src="student dashboard.js"></script>
     <script src="profile.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>

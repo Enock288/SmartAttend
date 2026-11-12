@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById("adminPassword").value;
         if (password !== document.getElementById("confirmPassword").value) { message.textContent = "Passwords do not match."; return; }
         try {
-            const response = await fetch(`${window.SMARTATTEND_API_URL || "http://localhost:3001"}/admin/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: document.getElementById("adminName").value.trim(), email: document.getElementById("adminEmail").value.trim().toLowerCase(), admin_id: document.getElementById("adminId").value.trim(), password }) });
+            const response = await fetch(`${window.SMARTATTEND_API_URL || window.location.origin}/admin/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: document.getElementById("adminName").value.trim(), email: document.getElementById("adminEmail").value.trim().toLowerCase(), admin_id: document.getElementById("adminId").value.trim(), password }) });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "Administrator registration failed.");
             message.textContent = "Registration successful. You can now log in.";

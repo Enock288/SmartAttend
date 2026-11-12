@@ -142,7 +142,8 @@
 
     </main>
 
-    <script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
+    <script src="env-config.js"></script>
+    <script>window.SMARTATTEND_API_URL = window.SMARTATTEND_API_URL || window.location.origin;</script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="login.js"></script>
 

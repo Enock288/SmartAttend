@@ -65,7 +65,7 @@ function showLoginMessage(message, success) {
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("lecturerLoginForm");
     const message = document.getElementById("loginMessage");
-    const API = window.SMARTATTEND_API_URL || "http://localhost:3001";
+    const API = window.SMARTATTEND_API_URL || window.location.origin;
     form?.addEventListener("submit", async event => {
         event.preventDefault();
         try {

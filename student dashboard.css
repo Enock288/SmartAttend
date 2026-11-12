@@ -1,11 +1,11 @@
 :root {
-    --navy: #101c35;
+    --navy: #070c16;
     --teal: #2dd4bf;
     --dark-teal: #0d9488;
     --background: #f3f6fa;
     --white: #ffffff;
-    --text: #25334b;
-    --muted: #78859a;
+    --text: #d3dae6;
+    --muted: #05080e;
     --border: #e6ecf3;
 }
 
@@ -355,6 +355,92 @@ body {
     font-size: 11px;
 }
 
+/* Attendance insight cards are part of the desktop dashboard layout. */
+.student-insights {
+    display: grid;
+    grid-template-columns: 1.5fr .7fr 1.5fr;
+    gap: 18px;
+    margin: 0 0 24px;
+}
+
+.insight-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(16, 28, 53, .035);
+}
+
+.progress-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.progress-card h2,
+.map-card h2 {
+    color: var(--navy);
+    font-size: 19px;
+    margin: 0 0 7px;
+}
+
+.progress-card p:last-child,
+.map-card p:last-child,
+.streak-card p:last-child {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.progress-ring {
+    --progress: 0%;
+    width: 96px;
+    height: 96px;
+    flex: 0 0 96px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(var(--dark-teal) var(--progress), #e2e8f0 0);
+    position: relative;
+}
+
+.progress-ring::after {
+    content: "";
+    position: absolute;
+    inset: 9px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.progress-ring span {
+    position: relative;
+    z-index: 1;
+    color: var(--navy);
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.streak-card strong {
+    display: block;
+    color: var(--dark-teal);
+    font-size: 32px;
+    margin: 15px 0 5px;
+}
+
+.map-card {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 12px;
+    align-items: center;
+}
+
+#campusMap {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    background: #ecfeff;
+}
+
 @media (max-width: 1100px) {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -382,20 +468,6 @@ body {
     overflow-y: auto;
     z-index: 1000;
 }
-
-.student-insights { display: grid; grid-template-columns: 1.5fr .7fr 1.5fr; gap: 18px; margin: 0 0 24px; }
-.insight-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 4px 16px rgba(16,28,53,.035); }
-.progress-card { display: flex; align-items: center; gap: 18px; }
-.progress-card h2, .map-card h2 { color: var(--navy); font-size: 19px; margin: 0 0 7px; }
-.progress-card p:last-child, .map-card p:last-child, .streak-card p:last-child { color: var(--muted); font-size: 12px; line-height: 1.5; }
-.progress-ring { --progress: 0%; width: 96px; height: 96px; flex: 0 0 96px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--dark-teal) var(--progress), #e2e8f0 0); position: relative; }
-.progress-ring::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: #fff; }
-.progress-ring span { position: relative; z-index: 1; color: var(--navy); font-size: 19px; font-weight: 800; }
-.streak-card strong { display: block; color: var(--dark-teal); font-size: 32px; margin: 15px 0 5px; }
-.map-card { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; align-items: center; }
-#campusMap { width: 100%; height: auto; border-radius: 10px; background: #ecfeff; }
-@media (max-width: 900px) { .student-insights { grid-template-columns: 1fr 1fr; } .map-card { grid-column: 1 / -1; } }
-@media (max-width: 560px) { .student-insights { grid-template-columns: 1fr; } .map-card { grid-column: auto; } }
 
 .sidebar-nav {
     display: flex;
@@ -449,6 +521,26 @@ body {
 @media (max-width: 380px) {
     .stats-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .student-insights {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .map-card {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 560px) {
+    .student-insights {
+        grid-template-columns: 1fr;
+    }
+
+    .map-card {
+        grid-column: auto;
     }
 }
 
@@ -741,6 +833,11 @@ body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
 .location-button { margin-top: 10px; border: 0; border-radius: 8px; padding: 10px 14px; background: #0f766e; color: #fff; font-weight: 700; cursor: pointer; }
 .location-button:disabled { opacity: .65; cursor: wait; }
 
+/* Warm pebble-grey cards with readable text. */
+.student-theme .panel, .student-theme .stat-card, .student-theme .insight-card, .student-theme .welcome-section { background: #e5e0d8; color: #243044; border-color: #cfc7bb; box-shadow: 0 12px 28px rgba(53, 45, 35, .12); }
+.student-theme .panel h2, .student-theme .panel h3, .student-theme .stat-card h3, .student-theme .insight-card h2 { color: #172235; }
+.student-theme .panel p, .student-theme .stat-card p, .student-theme .stat-card small, .student-theme .insight-card p { color: #4d5968; }
+
 /* Cyber-Glass student theme */
 .cyber-page { background: #0f172a; color: #e2e8f0; }
 .cyber-page #cyberScene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: .68; }
@@ -750,6 +847,9 @@ body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
 .student-theme .panel, .student-theme .stat-card, .student-theme .insight-card, .student-theme .welcome-section { background: rgba(15, 23, 42, .7); border: 1px solid rgba(34, 211, 238, .22); backdrop-filter: blur(16px); box-shadow: 0 18px 45px rgba(2, 6, 23, .38); transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); transition: transform .18s ease, box-shadow .25s ease, border-color .25s ease; }
 .student-theme .panel.cyber-hover, .student-theme .stat-card.cyber-hover, .student-theme .insight-card.cyber-hover, .student-theme .welcome-section.cyber-hover { border-color: #22d3ee; box-shadow: 0 24px 65px rgba(34, 211, 238, .18); }
 .student-theme .eyebrow, .student-theme .stat-card h3 { color: #2dd4bf; }
+.student-theme .panel, .student-theme .stat-card, .student-theme .insight-card, .student-theme .welcome-section { background: #e5e0d8; color: #243044; border-color: #cfc7bb; box-shadow: 0 12px 28px rgba(53, 45, 35, .12); }
+.student-theme .panel h2, .student-theme .panel h3, .student-theme .stat-card h3, .student-theme .insight-card h2 { color: #172235; }
+.student-theme .panel p, .student-theme .stat-card p, .student-theme .stat-card small, .student-theme .insight-card p { color: #4d5968; }
 
 /* Keep the fixed navigation inside the viewport instead of letting a 100%-wide
    content area extend underneath it. */

@@ -47,7 +47,7 @@ if (adminLogout) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const API = window.SMARTATTEND_API_URL || "http://localhost:3001";
+    const API = window.SMARTATTEND_API_URL || window.location.origin;
     const status = document.getElementById("auditStatus");
     try {
         const response = await fetch(`${API}/admin/overview`, { headers: { Authorization: `Bearer ${adminToken}` } });

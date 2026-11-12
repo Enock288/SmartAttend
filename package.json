@@ -5,6 +5,7 @@
   "main": "admin-dashboard.js",
   "scripts": {
     "start": "node server.js",
+    "build": "node scripts/generate-env.js",
     "test": "node --check server.js && node --check login.js && node --check register.js"
   },
   "repository": {

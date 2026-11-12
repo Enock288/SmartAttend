@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const button = form?.querySelector('.login-button');
   const password = document.getElementById('password');
   const toggle = document.getElementById('togglePassword');
-  const API_URL = window.SMARTATTEND_API_URL || 'http://localhost:3001';
+  const API_URL = window.SMARTATTEND_API_URL || window.location.origin;
   const show = (text, ok = false) => { message.textContent = text; message.className = `login-message message${ok ? ' success' : ''}`; };
   toggle?.addEventListener('click', () => { const hidden = password.type === 'password'; password.type = hidden ? 'text' : 'password'; toggle.textContent = hidden ? 'HIDE' : 'SHOW'; });
   form?.addEventListener('submit', async event => {
@@ -161,7 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('smartAttendUser', JSON.stringify(data.user));
       sessionStorage.setItem('smartAttendLoggedInStudent', JSON.stringify({ name: data.user.username, email: data.user.email, studentId: data.user.id }));
       show('Login successful. Opening your dashboard…', true);
-      setTimeout(() => { window.location.href = data.user.role === 'lecturer' ? 'lecturer dashboard.html' : 'student dashboard.html'; }, 450);
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
+      setTimeout(() => { window.location.href = redirect || (data.user.role === 'lecturer' ? 'lecturer dashboard.html' : 'student dashboard.html'); }, 450);
     } catch (error) { show(error.message || 'Unable to reach the backend.'); button.disabled = false; }
   });
 

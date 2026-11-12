@@ -1,27 +1,27 @@
 # SmartAttend full-stack setup
 
-## Node/Express API (optional)
+## Node/Express API (recommended for Render)
 
 1. Install dependencies: `npm install`.
 2. Start the API and static frontend: `npm start`.
-3. Open `http://localhost:3000/login.html`.
+3. Open `http://localhost:3001/login.html`.
 
 The API creates `database.db` automatically. Its active endpoints are:
 
 ```js
-await fetch('http://localhost:3000/register', {
+await fetch('http://localhost:3001/register', {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ username: 'Ada Lovelace', email: 'ada@example.com', password: 'correct-horse-battery', role: 'student' })
 });
 
-const login = await fetch('http://localhost:3000/login', {
+const login = await fetch('http://localhost:3001/login', {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ email: 'ada@example.com', password: 'correct-horse-battery' })
 });
 const { user } = await login.json();
 localStorage.setItem('smartAttendUser', JSON.stringify(user));
 
-await fetch('http://localhost:3000/attendance', {
+await fetch('http://localhost:3001/attendance', {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ user_id: user.id, status: 'Present' })
 });
@@ -29,7 +29,7 @@ await fetch('http://localhost:3000/attendance', {
 
 Passwords are hashed with bcrypt. Do not commit `database.db` or use the permissive CORS setting unchanged in production.
 
-## Java/SQLite API (current frontend integration)
+## Java/SQLite API (alternative local backend)
 
 The Java implementation is in [`backend/server.java`](./backend/server.java). It uses Java 17, SQLite, PBKDF2 password hashing, and the same three routes. Install Maven, then run:
 
@@ -56,6 +56,14 @@ If you add a new page that uses the Java API, set this before its frontend scrip
 ```
 
 Use either Node or Java as the API server for a given frontend session, not both for the same routes. The frontend login is [`login.html`](./login.html), registration is [`register.html`](./register.html), administrator pages are [`admin-login.html`](./admin-login.html), [`admin-register.html`](./admin-register.html), and [`admin-dashboard.html`](./admin-dashboard.html), and the student dashboard entry point is [`student-dashboard.html`](./student-dashboard.html).
+
+## Vercel + Render deployment
+
+Deploy the Node API as a Render web service using [`render.yaml`](./render.yaml). Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `CORS_ORIGIN` in Render; `CORS_ORIGIN` must be the deployed Vercel URL. The Render service uses its persistent disk at `/var/data/database.db`.
+
+Deploy the static frontend to Vercel from the same repository. Set `PUBLIC_API_URL` in Vercel to the Render service URL, for example `https://smartattend-api.onrender.com`. The Vercel build creates the ignored [`env-config.js`](./env-config.js) file consumed by the HTML pages.
+
+Copy [`.env.example`](./.env.example) for local configuration. Never commit `.env`, database files, uploads, or the generated `env-config.js` file.
 
 For production, replace the in-memory administrator token store, use HTTPS with secure HttpOnly cookies or short-lived signed tokens, restrict CORS to the deployed frontend origin, and move deployment-specific API URLs into environment configuration. Never commit generated SQLite databases, uploaded selfies, `node_modules`, or build output; these are covered by [`.gitignore`](./.gitignore).
 # SmartAttend

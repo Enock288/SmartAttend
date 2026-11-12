@@ -1,5 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelector('a[href="#student dashboard"]')?.setAttribute("href", "#dashboard");
+    const pendingSession = new URLSearchParams(window.location.search).get("session") || sessionStorage.getItem("smartAttendPendingSession");
+    const loggedInUser = JSON.parse(localStorage.getItem("smartAttendUser") || "null");
+    if (!loggedInUser?.id) {
+        if (pendingSession) sessionStorage.setItem("smartAttendPendingSession", pendingSession);
+        window.location.replace(`login.html?redirect=${encodeURIComponent(`student%20dashboard.html?session=${encodeURIComponent(pendingSession || "")}`)}`);
+        return;
+    }
+    if (pendingSession) sessionStorage.removeItem("smartAttendPendingSession");
     // 1. Get saved courses from My Courses
     const STORAGE_KEY = "smartAttendCourses";
     const ATTENDANCE_KEY = "smartAttendAttendance";
@@ -24,6 +32,29 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!Array.isArray(attendanceRecords)) attendanceRecords = [];
     } catch (error) {
         console.error("Could not load saved dashboard data:", error);
+    }
+
+    async function loadAttendanceRecords() {
+        try {
+            const response = await fetch(`${window.SMARTATTEND_API_URL || window.location.origin}/student/attendance?user_id=${encodeURIComponent(loggedInUser.id)}`);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Could not load attendance records.");
+            attendanceRecords = data.records || [];
+            localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(attendanceRecords));
+            renderAttendanceRecords();
+        } catch (error) { console.error(error); }
+    }
+
+    function renderAttendanceRecords() {
+        const body = document.getElementById("attendanceRecordsBody");
+        if (!body) return;
+        body.replaceChildren();
+        if (!attendanceRecords.length) { body.innerHTML = '<tr><td colspan="5">No attendance recorded yet.</td></tr>'; return; }
+        attendanceRecords.forEach(record => {
+            const row = document.createElement("tr");
+            [record.course_code || "—", record.date || "—", record.time || "—", record.recorded_at || record.timestamp || "—", record.status || "Present"].forEach(value => { const cell = document.createElement("td"); cell.textContent = value; row.appendChild(cell); });
+            body.appendChild(row);
+        });
     }
 
     // 2. Create a place to display saved courses
@@ -166,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
             navigator.geolocation.getCurrentPosition(async position => {
                 drawCampusMap(position.coords.latitude, position.coords.longitude);
                 const canvas = document.getElementById("selfieCanvas"); canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480; if (!uploadedSelfieData) { if (!activeStream) { captureMessage.textContent = "Capture a webcam selfie or upload an image first."; return; } canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height); } const selfieData = uploadedSelfieData || canvas.toDataURL("image/jpeg", .82);
-                try { const response = await fetch(`${window.SMARTATTEND_API_URL || "http://localhost:3001"}/attendance/scan`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, user_id: user.id, latitude: position.coords.latitude, longitude: position.coords.longitude, selfie_data: selfieData }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Attendance scan failed."); attendanceRecords.push({ id: result.attendanceId, status: "Present", timestamp: new Date().toISOString(), session_id: result.session_id }); localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(attendanceRecords)); updateStatistics(); captureMessage.textContent = "Attendance recorded: selfie and GPS verified."; if (scanMessage) scanMessage.textContent = "Secure attendance recorded successfully."; setTimeout(closeCapture, 1200); } catch (error) { captureMessage.textContent = error.message; }
+                try { const response = await fetch(`${window.SMARTATTEND_API_URL || window.location.origin}/attendance/scan`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, user_id: user.id, latitude: position.coords.latitude, longitude: position.coords.longitude, selfie_data: selfieData }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Attendance scan failed."); attendanceRecords.unshift(result.record); localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(attendanceRecords)); renderAttendanceRecords(); updateStatistics(); captureMessage.textContent = "Attendance recorded successfully."; if (scanMessage) scanMessage.textContent = "Secure attendance recorded successfully."; setTimeout(closeCapture, 1200); } catch (error) { captureMessage.textContent = error.message; }
             }, () => { captureMessage.textContent = "Location access is required. Enable GPS and try again."; }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
         };
         document.getElementById("cancelCaptureButton").onclick = closeCapture;
@@ -256,6 +287,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    if (pendingSession) beginSecureScan(pendingSession);
+    loadAttendanceRecords();
 
     // 6. Connect the Log Out links
     document.querySelectorAll('a[href="login.html"]').forEach(function (link) {

@@ -80,7 +80,7 @@ function showMessage(message, success) {
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("lecturerRegisterForm");
     const message = document.getElementById("registerMessage");
-    const API = window.SMARTATTEND_API_URL || "http://localhost:3001";
+    const API = window.SMARTATTEND_API_URL || window.location.origin;
     form?.addEventListener("submit", async event => {
         event.preventDefault();
         const password = document.getElementById("lecturerPassword").value;

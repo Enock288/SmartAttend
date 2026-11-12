@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: smartattend-api
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DB_PATH
+        value: /var/data/database.db
+    disk:
+      name: smartattend-data
+      mountPath: /var/data
+      sizeGB: 1

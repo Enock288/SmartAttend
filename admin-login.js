@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async event => {
         event.preventDefault();
         try {
-            const response = await fetch(`${window.SMARTATTEND_API_URL || "http://localhost:3001"}/admin/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: document.getElementById("adminEmail").value.trim().toLowerCase(), password: document.getElementById("adminPassword").value }) });
+            const response = await fetch(`${window.SMARTATTEND_API_URL || window.location.origin}/admin/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: document.getElementById("adminEmail").value.trim().toLowerCase(), password: document.getElementById("adminPassword").value }) });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "Administrator login failed.");
             localStorage.setItem("smartAttendAdminToken", data.token);
