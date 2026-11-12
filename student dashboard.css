@@ -383,6 +383,20 @@ body {
     z-index: 1000;
 }
 
+.student-insights { display: grid; grid-template-columns: 1.5fr .7fr 1.5fr; gap: 18px; margin: 0 0 24px; }
+.insight-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 4px 16px rgba(16,28,53,.035); }
+.progress-card { display: flex; align-items: center; gap: 18px; }
+.progress-card h2, .map-card h2 { color: var(--navy); font-size: 19px; margin: 0 0 7px; }
+.progress-card p:last-child, .map-card p:last-child, .streak-card p:last-child { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.progress-ring { --progress: 0%; width: 96px; height: 96px; flex: 0 0 96px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--dark-teal) var(--progress), #e2e8f0 0); position: relative; }
+.progress-ring::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: #fff; }
+.progress-ring span { position: relative; z-index: 1; color: var(--navy); font-size: 19px; font-weight: 800; }
+.streak-card strong { display: block; color: var(--dark-teal); font-size: 32px; margin: 15px 0 5px; }
+.map-card { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; align-items: center; }
+#campusMap { width: 100%; height: auto; border-radius: 10px; background: #ecfeff; }
+@media (max-width: 900px) { .student-insights { grid-template-columns: 1fr 1fr; } .map-card { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .student-insights { grid-template-columns: 1fr; } .map-card { grid-column: auto; } }
+
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -712,4 +726,34 @@ body {
 
 .student-badge:hover {
     transform: scale(1.05);
+}
+
+html, body { min-height: 100%; width: 100%; }
+body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
+.main-content { min-height: 100vh; width: 100%; }
+.security-capture { margin-top: 18px; padding: 18px; border: 1px solid #99f6e4; border-radius: 16px; background: #f0fdfa; }
+.security-capture video { display: block; width: min(100%, 360px); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: #0f172a; margin: 10px 0; }
+.capture-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.capture-actions button { border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; background: #0f766e; color: white; }
+.capture-actions button + button { background: #64748b; }
+.selfie-upload { display: inline-block; margin: 8px 0 12px; color: #0f766e; font-weight: 700; cursor: pointer; }
+#selfieUpload { display: block; max-width: 100%; }
+.location-button { margin-top: 10px; border: 0; border-radius: 8px; padding: 10px 14px; background: #0f766e; color: #fff; font-weight: 700; cursor: pointer; }
+.location-button:disabled { opacity: .65; cursor: wait; }
+
+/* Cyber-Glass student theme */
+.cyber-page { background: #0f172a; color: #e2e8f0; }
+.cyber-page #cyberScene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: .68; }
+.cyber-page > *:not(#cyberScene) { position: relative; z-index: 1; }
+.student-theme .sidebar { background: rgba(8, 25, 43, .84); border-right: 1px solid rgba(34, 211, 238, .2); backdrop-filter: blur(16px); }
+.student-theme .main-content { background: transparent; }
+.student-theme .panel, .student-theme .stat-card, .student-theme .insight-card, .student-theme .welcome-section { background: rgba(15, 23, 42, .7); border: 1px solid rgba(34, 211, 238, .22); backdrop-filter: blur(16px); box-shadow: 0 18px 45px rgba(2, 6, 23, .38); transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); transition: transform .18s ease, box-shadow .25s ease, border-color .25s ease; }
+.student-theme .panel.cyber-hover, .student-theme .stat-card.cyber-hover, .student-theme .insight-card.cyber-hover, .student-theme .welcome-section.cyber-hover { border-color: #22d3ee; box-shadow: 0 24px 65px rgba(34, 211, 238, .18); }
+.student-theme .eyebrow, .student-theme .stat-card h3 { color: #2dd4bf; }
+
+/* Keep the fixed navigation inside the viewport instead of letting a 100%-wide
+   content area extend underneath it. */
+.main-content { width: calc(100% - 245px); max-width: none; margin-left: 245px; }
+@media (max-width: 700px) {
+    .main-content { width: calc(100% - 200px); margin-left: 200px; }
 }

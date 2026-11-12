@@ -1,17 +1,56 @@
 /* SMARTATTEND LECTURER DASHBOARD */
 
 const loggedInLecturer = JSON.parse(
-    sessionStorage.getItem("smartAttendLoggedInLecturer") || "null"
+    localStorage.getItem("smartAttendUser") || sessionStorage.getItem("smartAttendLoggedInLecturer") || "null"
 );
 
 // Require a lecturer login before showing the dashboard.
-if (!loggedInLecturer) {
+if (!loggedInLecturer || loggedInLecturer.role !== "lecturer") {
     window.location.replace("lecturer-login.html");
 } else {
     startLecturerDashboard();
 }
 
+document.addEventListener("DOMContentLoaded", async function () {
+    const user = JSON.parse(localStorage.getItem("smartAttendUser") || "null");
+    if (!user || user.role !== "lecturer") return;
+    const API = window.SMARTATTEND_API_URL || "http://localhost:3001";
+    const message = document.createElement("p"); message.id = "apiMessage"; message.className = "api-message";
+    document.querySelector("#sessions .section-heading")?.after(message);
+    const courseForm = document.getElementById("courseForm");
+    const sessionForm = document.getElementById("sessionForm");
+    const courseList = document.getElementById("courseList");
+    const courseSelect = document.getElementById("sessionCourse");
+    const sessionList = document.getElementById("sessionList");
+    const qrDisplay = document.getElementById("qrDisplay");
+    let courses = [];
+    let sessions = [];
+    const courseCatalog = [
+        { code: "BSC-CS", name: "BSc. Computer Science" },
+        { code: "BSC-BIT", name: "BSc. Business Information Technology" },
+        { code: "BSC-BA", name: "BSc. Business Administration" }
+    ];
+    const showMessage = (text, ok = false) => { message.textContent = text; message.className = `api-message${ok ? " success" : ""}`; };
+    const request = async (path, options = {}) => { const response = await fetch(`${API}${path}`, { headers: { "Content-Type": "application/json" }, ...options }); const data = await response.json(); if (!response.ok) throw new Error(data.error || "Request failed."); return data; };
+    function renderCourses() { courseSelect.replaceChildren(new Option("Choose a course", "")); courseList.replaceChildren(); courses.forEach(course => { courseSelect.appendChild(new Option(`${course.course_code} — ${course.course_name}`, course.id)); const card = document.createElement("article"); card.className = "course-item"; card.innerHTML = `<strong>${course.course_code}</strong><span>${course.course_name}</span>`; courseList.appendChild(card); }); courseCatalog.filter(item => !courses.some(course => course.course_name === item.name)).forEach(item => courseSelect.appendChild(new Option(item.name, `catalog:${item.code}`))); if (!courses.length) courseList.innerHTML = `<div class="empty-state"><h3>No courses yet</h3><p>Select a course above when creating your first session.</p></div>`; document.getElementById("courseCount").textContent = courses.length; }
+    function renderSession(session) { const card = document.createElement("article"); card.className = "session-item api-session"; card.innerHTML = `<strong>${session.course_name}</strong><span>${session.date} at ${session.time}</span>`; const button = document.createElement("button"); button.className = "small-button"; button.textContent = "Show QR"; button.onclick = () => { qrDisplay.classList.remove("hidden"); qrDisplay.replaceChildren(); const title = document.createElement("h3"); title.textContent = `${session.course_name} · ${session.date} ${session.time}`; const code = document.createElement("div"); qrDisplay.append(title, code); if (window.QRCode) new QRCode(code, { text: session.token, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.M }); else showMessage("QR library is still loading. Try again."); }; card.appendChild(button); sessionList.prepend(card); }
+    async function loadDashboardData() { const overview = await request(`/lecturer/overview?lecturer_id=${encodeURIComponent(user.id)}`, { method: "GET" }); courses = overview.courses || []; sessions = overview.sessions || []; renderCourses(); sessionList.replaceChildren(); sessions.forEach(renderSession); if (!sessions.length) sessionList.innerHTML = `<div class="empty-state"><h3>No sessions created</h3><p>Create a course and then start an attendance session.</p></div>`; document.getElementById("sessionCount").textContent = sessions.length; document.getElementById("attendanceCount").textContent = (overview.attendance || []).length; document.getElementById("attendanceRate").textContent = overview.attendance?.length ? "100%" : "—"; const attendanceList = document.getElementById("attendanceList"); if (overview.attendance?.length) attendanceList.innerHTML = `<table><thead><tr><th>Student</th><th>Course</th><th>Date</th><th>Status</th></tr></thead><tbody>${overview.attendance.map(item => `<tr><td>${item.username}</td><td>${item.course_code}</td><td>${item.date} ${item.time}</td><td>${item.status}</td></tr>`).join("")}</tbody></table>`; }
+    try { await loadDashboardData(); } catch (error) { showMessage(error.message); }
+    courseForm?.addEventListener("submit", async event => { event.preventDefault(); try { await request("/lecturer/create-course", { method: "POST", body: JSON.stringify({ lecturer_id: user.id, course_code: document.getElementById("courseCode").value.trim().toUpperCase(), course_name: document.getElementById("courseTitle").value.trim() }) }); await loadDashboardData(); courseForm.reset(); courseForm.classList.add("hidden"); showMessage("Course created successfully.", true); } catch (error) { showMessage(error.message); } });
+    sessionForm?.addEventListener("submit", async event => { event.preventDefault(); const value = document.getElementById("sessionCourse").value; let selected = courses.find(course => String(course.id) === value); try { if (!selected && value.startsWith("catalog:")) { const catalogItem = courseCatalog.find(item => `catalog:${item.code}` === value); const created = await request("/lecturer/create-course", { method: "POST", body: JSON.stringify({ lecturer_id: user.id, course_code: `${catalogItem.code}-${user.id}`, course_name: catalogItem.name }) }); selected = created.course; } if (!selected) return showMessage("Choose a course first."); const data = await request("/lecturer/create-session", { method: "POST", body: JSON.stringify({ lecturer_id: user.id, course_id: selected.id, date: document.getElementById("sessionDate").value, time: document.getElementById("sessionTime").value }) }); await loadDashboardData(); sessionForm.reset(); sessionForm.classList.add("hidden"); showMessage("Secure QR session created.", true); showQr(data.session); } catch (error) { showMessage(error.message); } });
+    const showQr = session => { qrDisplay.classList.remove("hidden"); qrDisplay.replaceChildren(); const title = document.createElement("h3"); title.textContent = `${session.course_name} · ${session.date} ${session.time}`; const code = document.createElement("div"); qrDisplay.append(title, code); if (window.QRCode) new QRCode(code, { text: session.token, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.M }); const close = document.createElement("button"); close.type = "button"; close.className = "secondary-button"; close.textContent = "Hide QR Code"; close.onclick = () => qrDisplay.classList.add("hidden"); qrDisplay.appendChild(close); qrDisplay.scrollIntoView({ behavior: "smooth", block: "center" }); };
+    document.getElementById("addCourseButton")?.addEventListener("click", () => { courseForm.classList.toggle("hidden"); document.getElementById("courses").scrollIntoView({ behavior: "smooth" }); });
+    document.getElementById("cancelCourseButton")?.addEventListener("click", () => { courseForm.reset(); courseForm.classList.add("hidden"); });
+    const openSession = () => { sessionForm.classList.remove("hidden"); document.getElementById("sessions").scrollIntoView({ behavior: "smooth" }); };
+    document.getElementById("openSessionForm")?.addEventListener("click", openSession);
+    document.getElementById("createSessionShortcut")?.addEventListener("click", openSession);
+    document.getElementById("cancelSessionButton")?.addEventListener("click", () => { sessionForm.reset(); sessionForm.classList.add("hidden"); });
+    document.querySelectorAll(".nav-link").forEach(link => link.addEventListener("click", () => { document.querySelectorAll(".nav-link").forEach(item => item.classList.remove("active")); link.classList.add("active"); }));
+    document.getElementById("headerLecturerName").textContent = user.username; document.getElementById("welcomeLecturerName").textContent = user.username.split(" ")[0]; document.getElementById("profileLecturerName").textContent = user.username; document.getElementById("profileLecturerEmail").textContent = user.email; document.getElementById("logoutButton")?.addEventListener("click", () => { localStorage.removeItem("smartAttendUser"); window.location.href = "login.html"; });
+});
+
 function startLecturerDashboard() {
+    return; // API-backed dashboard is initialized below.
     const lecturerEmail = loggedInLecturer.email.toLowerCase();
     const storageSuffix = encodeURIComponent(lecturerEmail);
 

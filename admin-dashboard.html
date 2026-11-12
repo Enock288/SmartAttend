@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="admin-dashboard.css">
 </head>
 <body>
+    <canvas id="adminScene" aria-hidden="true"></canvas>
 
     <aside class="sidebar">
         <a href="admin-dashboard.html" class="brand">SmartAttend</a>
@@ -18,6 +19,7 @@
             <a href="#lecturers" class="nav-link">Lecturers</a>
             <a href="#courses" class="nav-link">Courses</a>
             <a href="#attendance" class="nav-link">Attendance</a>
+            <a href="#activity" class="nav-link">Live Audit</a>
             <a href="#reports" class="nav-link">Reports</a>
             <a href="#profile" class="nav-link">My Profile</a>
         </nav>
@@ -145,6 +147,14 @@
             <p>Attendance reports and system summaries will be added here.</p>
         </section>
 
+        <section class="content-card audit-card" id="activity">
+            <div class="section-heading">
+                <div><h2>Live Database Audit</h2><p>Recent registrations, sessions, and verified attendance activity.</p></div>
+                <span id="auditStatus" class="audit-status">Loading…</span>
+            </div>
+            <div class="table-wrapper"><table><thead><tr><th>Time</th><th>Student</th><th>Course</th><th>Status</th><th>GPS</th><th>Selfie</th></tr></thead><tbody id="activityTable"><tr><td colspan="6">Loading activity…</td></tr></tbody></table></div>
+        </section>
+
         <section class="content-card" id="profile">
             <h2>My Profile</h2>
             <p><strong>Administrator ID:</strong> <span id="adminId">—</span></p>
@@ -157,6 +167,8 @@
 
     </main>
 
+    <script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="admin-dashboard.js"></script>
 </body>
 </html>

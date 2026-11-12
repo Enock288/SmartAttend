@@ -140,3 +140,39 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
+  const message = document.getElementById('loginMessage');
+  const button = form?.querySelector('.login-button');
+  const password = document.getElementById('password');
+  const toggle = document.getElementById('togglePassword');
+  const API_URL = window.SMARTATTEND_API_URL || 'http://localhost:3001';
+  const show = (text, ok = false) => { message.textContent = text; message.className = `login-message message${ok ? ' success' : ''}`; };
+  toggle?.addEventListener('click', () => { const hidden = password.type === 'password'; password.type = hidden ? 'text' : 'password'; toggle.textContent = hidden ? 'HIDE' : 'SHOW'; });
+  form?.addEventListener('submit', async event => {
+    event.preventDefault(); show(''); button.disabled = true;
+    const payload = { email: document.getElementById('email').value.trim().toLowerCase(), password: password.value, role: document.getElementById('role')?.value || 'student' };
+    try {
+      const response = await fetch(`${API_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Login failed.');
+      if (data.user.role !== payload.role) throw new Error(`This account is registered as ${data.user.role}.`);
+      localStorage.setItem('smartAttendUser', JSON.stringify(data.user));
+      sessionStorage.setItem('smartAttendLoggedInStudent', JSON.stringify({ name: data.user.username, email: data.user.email, studentId: data.user.id }));
+      show('Login successful. Opening your dashboard…', true);
+      setTimeout(() => { window.location.href = data.user.role === 'lecturer' ? 'lecturer dashboard.html' : 'student dashboard.html'; }, 450);
+    } catch (error) { show(error.message || 'Unable to reach the backend.'); button.disabled = false; }
+  });
+
+  if (window.THREE) {
+    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, .1, 100), renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('scene'), alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.setSize(innerWidth, innerHeight); camera.position.z = 7;
+    const points = [], geometry = new THREE.BufferGeometry(); for (let i = 0; i < 380; i++) points.push((Math.random() - .5) * 15, (Math.random() - .5) * 10, (Math.random() - .5) * 7);
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3)); const material = new THREE.PointsMaterial({ color: 0x52f6dd, size: .025, transparent: true, opacity: .7 }); const stars = new THREE.Points(geometry, material); scene.add(stars);
+    const mouse = { x: 0, y: 0 }; addEventListener('pointermove', e => { mouse.x = (e.clientX / innerWidth - .5) * .5; mouse.y = (e.clientY / innerHeight - .5) * .5; });
+    const animate = () => { stars.rotation.y += .0008; stars.rotation.x += (mouse.y - stars.rotation.x) * .01; camera.position.x += (mouse.x - camera.position.x) * .01; renderer.render(scene, camera); requestAnimationFrame(animate); }; animate();
+    addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+  }
+  const card = document.querySelector('[data-tilt]'); card?.addEventListener('pointermove', e => { const box = card.getBoundingClientRect(); card.style.transform = `perspective(900px) rotateX(${-(e.clientY - box.top - box.height / 2) / 35}deg) rotateY(${(e.clientX - box.left - box.width / 2) / 35}deg)`; }); card?.addEventListener('pointerleave', () => { card.style.transform = ''; });
+});

@@ -1,112 +1,17 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const registerForm = document.getElementById("registerForm");
-    const registerMessage = document.getElementById("registerMessage");
-
-    registerForm.addEventListener("submit", function (event) {
-        event.preventDefault();
-        registerMessage.textContent = "";
-
-        // Get the student's details
-        const name = document.getElementById("fullName").value.trim();
-        const studentId = document.getElementById("studentId").value.trim();
-        const email = document.getElementById("registerEmail").value.trim().toLowerCase();
-        const department = document.getElementById("department").value.trim();
-        const level = document.getElementById("level").value;
-        const password = document.getElementById("registerPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        const agreeTerms = document.getElementById("agreeTerms").checked;
-
-        // Validate the details
-        if (password.length < 8) {
-            registerMessage.textContent =
-                "Your password must contain at least 8 characters.";
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            registerMessage.textContent =
-                "Your passwords do not match. Please try again.";
-            return;
-        }
-
-        if (!agreeTerms) {
-            registerMessage.textContent =
-                "Please confirm that your information is correct.";
-            return;
-        }
-
-        // Retrieve previously registered students
-        let students = [];
-
-        try {
-            students = JSON.parse(
-                localStorage.getItem("smartAttendStudents") || "[]"
-            );
-
-            if (!Array.isArray(students)) {
-                students = [];
-            }
-        } catch (error) {
-            registerMessage.textContent =
-                "Unable to read saved accounts. Please try again.";
-            return;
-        }
-
-        // Check whether the email is already registered
-        const emailExists = students.some(function (student) {
-            return student.email &&
-                student.email.toLowerCase() === email;
-        });
-
-        if (emailExists) {
-            registerMessage.textContent =
-                "This email is already registered. Please log in.";
-            return;
-        }
-
-        // Check whether the student ID is already registered
-        const idExists = students.some(function (student) {
-            return student.studentId &&
-                student.studentId.toLowerCase() === studentId.toLowerCase();
-        });
-
-        if (idExists) {
-            registerMessage.textContent =
-                "This student ID is already registered.";
-            return;
-        }
-
-        // Create the new student account
-        const newStudent = {
-            name: name,
-            studentId: studentId,
-            email: email,
-            department: department,
-            level: level,
-            password: password
-        };
-
-        students.push(newStudent);
-
-        // Save the account in the browser
-        try {
-            localStorage.setItem(
-                "smartAttendStudents",
-                JSON.stringify(students)
-            );
-        } catch (error) {
-            registerMessage.textContent =
-                "The account could not be saved. Please try again.";
-            return;
-        }
-
-        registerMessage.textContent =
-            "Account created successfully! Redirecting to login...";
-
-        registerForm.reset();
-
-        setTimeout(function () {
-            window.location.href = "login.html";
-        }, 1500);
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('registerForm');
+  const message = document.getElementById('registerMessage');
+  const button = form?.querySelector('button[type="submit"]');
+  const API_URL = window.SMARTATTEND_API_URL || 'http://localhost:3001';
+  form?.addEventListener('submit', async event => {
+    event.preventDefault(); message.textContent = '';
+    const password = document.getElementById('registerPassword').value;
+    if (password.length < 8) { message.textContent = 'Your password must contain at least 8 characters.'; return; }
+    if (password !== document.getElementById('confirmPassword').value) { message.textContent = 'Your passwords do not match.'; return; }
+    if (!document.getElementById('agreeTerms').checked) { message.textContent = 'Please confirm that your information is correct.'; return; }
+    button.disabled = true;
+    const payload = { username: document.getElementById('fullName').value.trim(), email: document.getElementById('registerEmail').value.trim().toLowerCase(), password, role: 'student' };
+    try { const response = await fetch(`${API_URL}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Registration failed.'); localStorage.setItem('smartAttendUser', JSON.stringify(data.user)); message.textContent = 'Account created. Redirecting to login…'; setTimeout(() => { window.location.href = 'login.html'; }, 700); }
+    catch (error) { message.textContent = error instanceof TypeError ? 'The backend is unavailable. Start the Java server and try again.' : error.message; button.disabled = false; }
+  });
 });

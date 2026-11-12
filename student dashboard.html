@@ -6,7 +6,7 @@
   <title>Student dashboard | SmartAttend</title>
   <link rel = "stylesheet" href = "student dashboard.css">
 </head>
-<body>
+<body class="student-theme">
   <aside class="sidebar">
         <a href="home.html" class="brand">
             <span class="smart-text">Smart</span><span class="attend-text">Attend</span>
@@ -69,6 +69,15 @@
                 <h3 id="attendanceRate">0%</h3>
                 <small>Your overall attendance</small>
             </article>
+        </section>
+
+        <section class="student-insights" aria-label="Attendance insights">
+            <article class="insight-card progress-card">
+                <div class="progress-ring" id="progressRing"><span id="progressValue">0%</span></div>
+                <div><p class="eyebrow">ATTENDANCE PROGRESS</p><h2>Keep your momentum</h2><p>Your verified attendance rate updates after each secure check-in.</p></div>
+            </article>
+            <article class="insight-card streak-card"><p class="eyebrow">CONSISTENCY</p><strong id="streakCount">0 days</strong><p>Current attendance streak</p></article>
+            <article class="insight-card map-card"><div><p class="eyebrow">CAMPUS GEOFENCE</p><h2>Live check-in map</h2><p id="mapStatus">Allow location access to show your live position.</p><button type="button" id="locateButton" class="location-button">Use My Live Location</button></div><canvas id="campusMap" width="360" height="150" aria-label="Campus geofence map"></canvas></article>
         </section>
 
         <section class="content-grid">
@@ -217,6 +226,18 @@
             <div id="qr-reader">
 
             </div>
+            <div id="securityCapture" class="security-capture" hidden>
+                <p class="eyebrow">SECURE CHECK-IN</p>
+                <video id="selfieVideo" autoplay playsinline muted></video>
+                <canvas id="selfieCanvas" hidden></canvas>
+                <label class="selfie-upload" for="selfieUpload">Or upload a selfie image</label>
+                <input id="selfieUpload" type="file" accept="image/jpeg,image/png,image/webp" capture="user">
+                <div class="capture-actions">
+                    <button type="button" id="captureSelfieButton">Capture selfie & verify GPS</button>
+                    <button type="button" id="cancelCaptureButton">Cancel</button>
+                </div>
+                <p id="captureMessage" class="scan-message" aria-live="polite"></p>
+            </div>
           
 
 
@@ -228,6 +249,7 @@
         </footer>
     </main>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
     <script src="student dashboard.js"></script>
     <script src="profile.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>

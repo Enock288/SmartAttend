@@ -3,6 +3,82 @@ body{
     margin: 0;
 }
 
+html, body { min-height: 100%; width: 100%; }
+body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
+.dashboard, .features-section, .how-it-works { width: 100%; }
+
+body { background: #06111f; color: #e2e8f0; }
+#landingScene { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: .72; }
+body > *:not(#landingScene) { position: relative; z-index: 1; }
+.navbar { position: sticky; top: 0; z-index: 5; background: rgba(5, 18, 34, .78); border-bottom: 1px solid rgba(94, 234, 212, .24); backdrop-filter: blur(18px); }
+.dashboard { background: linear-gradient(135deg, rgba(7, 25, 45, .94), rgba(10, 56, 78, .78)); }
+.card, .feature-showcase, .benefit-card, .step-card { background: rgba(15, 35, 56, .72); border: 1px solid rgba(148, 163, 184, .22); box-shadow: 0 20px 50px rgba(0, 0, 0, .22); backdrop-filter: blur(16px); }
+.card:hover, .benefit-card:hover, .step-card:hover { transform: translateY(-7px) scale(1.01); box-shadow: 0 24px 60px rgba(20, 184, 166, .16); }
+.features-section, .how-it-works { background: rgba(6, 17, 31, .9); }
+.feature-showcase h3, .benefit-card h3, .step-card h3 { color: #f8fafc; }
+.feature-showcase > p, .benefit-card p, .step-card p { color: #b6c5d6; }
+@media (max-width: 720px) { .navbar { flex-wrap: wrap; gap: 12px; } .nav-links { gap: 14px; flex-wrap: wrap; } .nav-links a { font-size: 13px; } }
+
+/* Cyber-Glass system */
+.cyber-page { background: #0f172a; color: #e2e8f0; }
+.cyber-page #landingScene, .cyber-page #cyberScene { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; opacity: .7; }
+.cyber-page > *:not(canvas), .cyber-page .dashboard-layout { position: relative; z-index: 1; }
+.cyber-page .navbar { background: rgba(15, 23, 42, .72); border-bottom: 1px solid rgba(34, 211, 238, .24); backdrop-filter: blur(16px); }
+.cyber-page .card, .cyber-page .feature-showcase, .cyber-page .benefit-card, .cyber-page .step-card { background: rgba(15, 23, 42, .7); border: 1px solid rgba(148, 163, 184, .24); backdrop-filter: blur(16px); box-shadow: 0 18px 45px rgba(2, 6, 23, .38); transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateZ(0); transition: transform .18s ease, box-shadow .25s ease, border-color .25s ease; }
+.cyber-page .card.cyber-hover, .cyber-page .feature-showcase.cyber-hover, .cyber-page .benefit-card.cyber-hover, .cyber-page .step-card.cyber-hover { border-color: rgba(34, 211, 238, .72); box-shadow: 0 24px 65px rgba(34, 211, 238, .18); }
+
+/* Keep the 3D nodes visible behind the entire landing-page surface. */
+.home-theme #homeBackground { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 1; pointer-events: none; }
+.home-theme .dashboard,
+.home-theme .features-section,
+.home-theme .how-it-works,
+.home-theme .site-footer { background: rgba(7, 25, 45, .66); }
+.home-theme .dashboard { position: relative; isolation: isolate; }
+.home-theme .dashboard::before,
+.home-theme .features-section::before,
+.home-theme .how-it-works::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 20% 20%, rgba(34, 211, 238, .08), transparent 34%), radial-gradient(circle at 80% 70%, rgba(16, 185, 129, .07), transparent 30%); }
+.home-theme .dashboard > *,
+.home-theme .features-section > *,
+.home-theme .how-it-works > * { position: relative; z-index: 1; }
+.home-theme { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; width: 100vw; }
+.home-theme h1, .home-theme h2, .home-theme h3, .home-theme p, .home-theme a { text-shadow: 0 1px 16px rgba(2, 6, 23, .28); }
+.home-theme h1, .home-theme h2, .home-theme h3 { color: #f8fafc; font-weight: 800; letter-spacing: -.02em; }
+.home-theme p { color: #dbeafe; }
+.home-theme .nav-links a, .home-theme .footer-links a, .home-theme .footer-account a { color: #f1f5f9; }
+
+/* Final high-contrast text pass for the dark landing page. */
+.home-theme,
+.home-theme .dashboard,
+.home-theme .features-section,
+.home-theme .how-it-works,
+.home-theme .site-footer { color: #ffffff; }
+.home-theme h1,
+.home-theme h2,
+.home-theme h3,
+.home-theme h4,
+.home-theme p,
+.home-theme li,
+.home-theme span,
+.home-theme label,
+.home-theme .card p,
+.home-theme .features-heading p,
+.home-theme .feature-showcase > p,
+.home-theme .benefit-card p,
+.home-theme .step-card p,
+.home-theme .steps-note p { color: #ffffff !important; }
+.home-theme .section-label,
+.home-theme .feature-tag { color: #a7f3d0 !important; }
+.home-theme .feature-tag { background: rgba(15, 118, 110, .7); }
+.home-theme .feature-showcase,
+.home-theme .card,
+.home-theme .benefit-card,
+.home-theme .step-card { background: rgba(15, 23, 42, .86); }
+.home-theme .nav-links a,
+.home-theme .footer-links a,
+.home-theme .footer-account a,
+.home-theme .footer-brand p { color: #ffffff !important; }
+.home-theme button { color: #ffffff; }
+
 
 
 
@@ -646,3 +722,6 @@ body{
         text-align: center;
     }
 }
+html, body { min-height: 100%; width: 100%; }
+body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
+.dashboard, .features-section, .how-it-works { width: 100%; }

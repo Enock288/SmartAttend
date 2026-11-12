@@ -1,0 +1,22 @@
+# Runtime data and generated files
+database*.db
+database*.db-*
+uploads/
+
+# Dependencies and build output
+node_modules/
+backend/target/
+*.class
+
+# Local logs and environment files
+*.log
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
+.vscode/
+.idea/
+*.user
+Thumbs.db
+Desktop.ini

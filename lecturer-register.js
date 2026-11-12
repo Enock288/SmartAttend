@@ -2,6 +2,7 @@ const lecturerRegisterForm = document.getElementById("lecturerRegisterForm");
 const registerMessage = document.getElementById("registerMessage");
 
 lecturerRegisterForm.addEventListener("submit", function (event) {
+    return; // API-backed registration is defined below.
     event.preventDefault();
 
     const name = document.getElementById("lecturerName").value.trim();
@@ -75,3 +76,15 @@ function showMessage(message, success) {
     registerMessage.textContent = message;
     registerMessage.style.color = success ? "#0f766e" : "#dc2626";
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("lecturerRegisterForm");
+    const message = document.getElementById("registerMessage");
+    const API = window.SMARTATTEND_API_URL || "http://localhost:3001";
+    form?.addEventListener("submit", async event => {
+        event.preventDefault();
+        const password = document.getElementById("lecturerPassword").value;
+        if (password !== document.getElementById("confirmPassword").value) { message.textContent = "Your passwords do not match."; return; }
+        try { const response = await fetch(`${API}/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: document.getElementById("lecturerName").value.trim(), email: document.getElementById("lecturerEmail").value.trim().toLowerCase(), password, role: "lecturer" }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || "Registration failed."); localStorage.setItem("smartAttendUser", JSON.stringify(data.user)); message.textContent = "Registration successful. Opening lecturer login…"; setTimeout(() => { window.location.href = "lecturer-login.html"; }, 700); } catch (error) { message.textContent = error.message; }
+    });
+});

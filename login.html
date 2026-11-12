@@ -8,6 +8,7 @@
 
 </head>
 <body>
+  <canvas id="scene" aria-hidden="true"></canvas>
 
   <main class="login-page">
 
@@ -49,7 +50,7 @@
         <!-- Right login form -->
         <section class="login-form-section">
 
-            <div class="login-card">
+            <div class="login-card" data-tilt>
 
                 <div class="mobile-brand">
                     <span class="smart-text">Smart</span><span class="attend-text">Attend</span>
@@ -72,6 +73,14 @@
                             autocomplete="email"
                             required
                         >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Continue as</label>
+                        <select id="role" name="role">
+                            <option value="student">Student</option>
+                            <option value="lecturer">Lecturer</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -112,22 +121,6 @@
                     </button>
 
                     <p id="loginMessage" class="login-message" aria-live="polite"></p>
-        <div id="g_id_onload"
-            data-client_id="92175470588-a528h5vkc0c49c031oado66n2vkcqv8k.apps.googleusercontent.com"
-            data-context="signin"
-            data-ux_mode="popup"
-            data-callback="handleGoogleSignIn"
-            data-auto_prompt="false">
-        </div>
-
-        <div class="g_id_signin"
-            data-type="standard"
-            data-shape="rectangular"
-            data-theme="outline"
-            data-text="signin_with"
-            data-size="large"
-            data-logo_alignment="left">
-        </div>
                 </form>
 
                 <div class="login-divider">
@@ -149,12 +142,11 @@
 
     </main>
 
+    <script>window.SMARTATTEND_API_URL = 'http://localhost:3001';</script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="login.js"></script>
 
     
-
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="google-login.js"></script>
 
 </body>
 </html>

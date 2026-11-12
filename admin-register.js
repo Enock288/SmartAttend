@@ -2,6 +2,7 @@ const adminRegisterForm = document.getElementById("adminRegisterForm");
 const registerMessage = document.getElementById("registerMessage");
 
 adminRegisterForm.addEventListener("submit", async function (event) {
+    return; // Backend registration handler is defined below.
     event.preventDefault();
 
     const name = document.getElementById("adminName").value.trim();
@@ -65,4 +66,21 @@ adminRegisterForm.addEventListener("submit", async function (event) {
         registerMessage.textContent = "Registration failed. Please try again using Live Server.";
         registerMessage.style.color = "red";
     }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("adminRegisterForm");
+    const message = document.getElementById("registerMessage");
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const password = document.getElementById("adminPassword").value;
+        if (password !== document.getElementById("confirmPassword").value) { message.textContent = "Passwords do not match."; return; }
+        try {
+            const response = await fetch(`${window.SMARTATTEND_API_URL || "http://localhost:3001"}/admin/register`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: document.getElementById("adminName").value.trim(), email: document.getElementById("adminEmail").value.trim().toLowerCase(), admin_id: document.getElementById("adminId").value.trim(), password }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Administrator registration failed.");
+            message.textContent = "Registration successful. You can now log in.";
+            form.reset();
+        } catch (error) { message.textContent = error.message || "Unable to reach the backend."; }
+    });
 });
