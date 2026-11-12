@@ -1,0 +1,2 @@
+# SmartAttend
+student attendance system
