@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 
 const app = express();
-const PORT = Number(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
 const db = new sqlite3.Database(path.join(__dirname, 'database.db'));
 app.use(cors());
 app.use(express.json({ limit: '32kb' }));
