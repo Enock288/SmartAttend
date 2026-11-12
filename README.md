@@ -58,3 +58,5 @@ If you add a new page that uses the Java API, set this before its frontend scrip
 Use either Node or Java as the API server for a given frontend session, not both for the same routes. The frontend login is [`login.html`](./login.html), registration is [`register.html`](./register.html), administrator pages are [`admin-login.html`](./admin-login.html), [`admin-register.html`](./admin-register.html), and [`admin-dashboard.html`](./admin-dashboard.html), and the student dashboard entry point is [`student-dashboard.html`](./student-dashboard.html).
 
 For production, replace the in-memory administrator token store, use HTTPS with secure HttpOnly cookies or short-lived signed tokens, restrict CORS to the deployed frontend origin, and move deployment-specific API URLs into environment configuration. Never commit generated SQLite databases, uploaded selfies, `node_modules`, or build output; these are covered by [`.gitignore`](./.gitignore).
+# SmartAttend
+student attendance system
