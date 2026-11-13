@@ -23,9 +23,9 @@
     "cors": "^2.8.6",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "^5.1.7"
   },
   "allowScripts": {
-    "sqlite3@6.0.1": true
+    "sqlite3@5.1.7": true
   }
 }
