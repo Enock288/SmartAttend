@@ -9,7 +9,8 @@ const PORT = Number(process.env.PORT || 3001);
 const databasePath = process.env.DB_PATH || path.join(__dirname, 'database.db');
 const db = new sqlite3.Database(databasePath);
 const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(origin => origin.trim()).filter(Boolean);
-app.use(cors(allowedOrigins.length ? { origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)) } : undefined));
+const isAllowedOrigin = origin => !origin || !allowedOrigins.length || allowedOrigins.includes(origin) || /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/i.test(origin);
+app.use(cors(allowedOrigins.length ? { origin: (origin, callback) => callback(null, isAllowedOrigin(origin)) } : undefined));
 app.use(express.json({ limit: '32kb' }));
 app.use(express.static(__dirname));
 
