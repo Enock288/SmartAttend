@@ -26,8 +26,8 @@ db.serialize(() => {
 
 const validRoles = new Set(['student', 'lecturer']);
 const validStatuses = new Set(['Present', 'Absent', 'Late']);
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || '').trim();
 const adminTokens = new Set();
 const clean = value => typeof value === 'string' ? value.trim() : '';
 const qrToken = value => { try { return new URL(value, 'http://smartattend.local').searchParams.get('session') || value; } catch (_) { return value; } };
