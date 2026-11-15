@@ -753,6 +753,22 @@ body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
 .lecturer-theme .eyebrow, .lecturer-theme .stat-card h2 { color: #c4b5fd; }
 .qr-display canvas { max-width: 100%; height: auto; }
 
+/* Touch-friendly tables and controls on phones. */
+.table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-wrapper table { min-width: 680px; width: 100%; }
+.small-button, .primary-button, .secondary-button, .logout-button { min-height: 44px; }
+@media (max-width: 760px) {
+    .main-content { padding: 18px 14px 32px; }
+    .topbar { margin-bottom: 22px; }
+    .dashboard-heading h2 { font-size: 25px; }
+    .content-card { padding: 16px; }
+    .section-heading { gap: 12px; }
+    .section-heading .primary-button, .welcome-section .primary-button { width: 100%; }
+    .course-item, .api-session { align-items: flex-start; flex-wrap: wrap; }
+    .api-session .small-button { margin-left: 0; width: 100%; }
+    .qr-display { padding: 18px 12px; }
+}
+
 /* Keep the cyber background visible while making every lecture label readable. */
 .cyber-page { background: #101827; color: #f8fafc; }
 .lecturer-theme .content-card, .lecturer-theme .stat-card, .lecturer-theme .welcome-section { background: rgba(15, 23, 42, .88); color: #f8fafc; }

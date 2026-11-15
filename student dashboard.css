@@ -855,5 +855,30 @@ body { min-height: 100vh; width: 100vw; overflow-x: hidden; }
    content area extend underneath it. */
 .main-content { width: calc(100% - 245px); max-width: none; margin-left: 245px; }
 @media (max-width: 700px) {
-    .main-content { width: calc(100% - 200px); margin-left: 200px; }
+    .main-content { width: 100%; margin-left: 0; padding: 18px 14px 32px; }
+    .sidebar { position: static; width: 100%; min-height: auto; padding: 14px; }
+    .sidebar-nav { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+    .nav-link { flex: 0 0 auto; min-height: 44px; }
+    .logout-link { display: inline-flex; margin-top: 10px; }
+    .topbar { gap: 12px; flex-wrap: wrap; }
+    .welcome-section, .profile-title-row { flex-direction: column; align-items: flex-start; }
+    .stats-grid, .content-grid, .student-insights { grid-template-columns: 1fr; }
+    .map-card { grid-column: auto; }
+    .panel, .welcome-section { padding: 18px; }
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { min-width: 620px; }
+    .scan-panel > button { width: 100%; min-height: 48px; }
 }
+
+@media (max-width: 420px) {
+    .topbar h1 { font-size: 24px; }
+    .student-badge { width: 48px; height: 48px; min-width: 48px; }
+    #qr-reader { padding: 8px; margin: 14px 0; }
+    #qr-reader__scan_region { min-height: 0; }
+}
+
+.security-capture h3 { margin: 4px 0 6px; color: #172235; }
+.capture-help { margin-bottom: 12px; }
+.security-capture > label { display: block; font-weight: 700; font-size: 13px; margin-top: 12px; }
+.check-in-name { width: 100%; max-width: 420px; min-height: 44px; margin-top: 6px; padding: 10px 12px; border: 1px solid #94a3b8; border-radius: 8px; background: #fff; }
+.security-capture video { max-width: 100%; }

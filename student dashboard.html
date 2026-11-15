@@ -224,8 +224,8 @@
 
         <section class="panel scan-panel" id="scan">
             <div>
-                <p class="eyebrow">SMART ATTENDANCE</p>
-                <h2>Ready to mark your attendance?</h2>
+                <p class="eyebrow">SMART ATTENDANCE - STEP 1</p>
+                <h2>Sign your attendance</h2>
                 <p>Scan your lecturer's class QR code when the attendance session is open.</p>
             </div>
             <button type="button" id="scanButton">Scan QR Code ↗</button>
@@ -235,7 +235,11 @@
 
             </div>
             <div id="securityCapture" class="security-capture" hidden>
-                <p class="eyebrow">SECURE CHECK-IN</p>
+                <p class="eyebrow">SECURE CHECK-IN - STEP 2</p>
+                <h3>Confirm your identity</h3>
+                <p class="capture-help">Enter the name on your student account, then take a clear selfie so your lecturer can verify this check-in.</p>
+                <label for="checkInName">Full name</label>
+                <input id="checkInName" class="check-in-name" type="text" autocomplete="name" required>
                 <video id="selfieVideo" autoplay playsinline muted></video>
                 <canvas id="selfieCanvas" hidden></canvas>
                 <label class="selfie-upload" for="selfieUpload">Or upload a selfie image</label>

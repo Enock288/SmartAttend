@@ -17,11 +17,18 @@ app.use(express.static(__dirname));
 db.serialize(() => {
   db.run('PRAGMA foreign_keys = ON');
   db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, email TEXT NOT NULL UNIQUE COLLATE NOCASE, password TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'lecturer')), created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
-  db.run(`CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, status TEXT NOT NULL CHECK (status IN ('Present', 'Absent', 'Late')), recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
+  db.run(`CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, status TEXT NOT NULL CHECK (status IN ('Present', 'Absent', 'Late')), recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, student_name TEXT, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)`);
   db.run(`CREATE TABLE IF NOT EXISTS courses (id INTEGER PRIMARY KEY AUTOINCREMENT, course_code TEXT NOT NULL UNIQUE COLLATE NOCASE, course_name TEXT NOT NULL, lecturer_id INTEGER NOT NULL, FOREIGN KEY (lecturer_id) REFERENCES users(id) ON DELETE CASCADE)`);
   db.run(`CREATE TABLE IF NOT EXISTS attendance_sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, course_id INTEGER NOT NULL, date TEXT NOT NULL, time TEXT NOT NULL, token TEXT NOT NULL UNIQUE, FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE)`);
   db.run('ALTER TABLE attendance ADD COLUMN session_id INTEGER', () => {});
+  db.run('ALTER TABLE attendance ADD COLUMN student_name TEXT', () => {});
   db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_attendance_user_session ON attendance(user_id, session_id) WHERE session_id IS NOT NULL');
+  // Keep the documented demo accounts available on fresh local installs and deployments.
+  // INSERT OR IGNORE preserves an existing account if a developer has already changed it.
+  db.run('INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)', ['Agyei Student', 'agyei11@gmail.com', bcrypt.hashSync('Agyei1234', 12), 'student']);
+  db.run('INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)', ['Lena Lecturer', 'lena11@gmail.com', bcrypt.hashSync('Lena1234', 12), 'lecturer']);
+  db.run('UPDATE users SET password = ?, role = ? WHERE email = ?', [bcrypt.hashSync('Agyei1234', 12), 'student', 'agyei11@gmail.com']);
+  db.run('UPDATE users SET password = ?, role = ? WHERE email = ?', [bcrypt.hashSync('Lena1234', 12), 'lecturer', 'lena11@gmail.com']);
 });
 
 const validRoles = new Set(['student', 'lecturer']);
@@ -105,13 +112,16 @@ app.post('/attendance/scan', async (req, res) => {
   try {
     const student = await query('SELECT id, username, email FROM users WHERE id = ? AND role = \'student\'', [userId]);
     if (!student) return errorResponse(res, 403, 'Only registered students can record attendance.');
+    const suppliedName = clean(req.body?.student_name);
+    if (!suppliedName) return errorResponse(res, 400, 'Confirm your full name before checking in.');
+    if (suppliedName.toLocaleLowerCase() !== student.username.toLocaleLowerCase()) return errorResponse(res, 403, 'The name entered does not match the signed-in student account.');
     const session = await query(`SELECT s.id, s.course_id, s.date, s.time, c.course_code, c.course_name
       FROM attendance_sessions s JOIN courses c ON c.id = s.course_id WHERE s.token = ?`, [token]);
     if (!session) return errorResponse(res, 404, 'Invalid or expired QR code.');
     const duplicate = await query('SELECT id FROM attendance WHERE user_id = ? AND session_id = ?', [userId, session.id]);
     if (duplicate) return errorResponse(res, 409, 'You have already recorded attendance for this session.');
-    const result = await run('INSERT INTO attendance (user_id, status, session_id) VALUES (?, ?, ?)', [userId, 'Present', session.id]);
-    const record = await query(`SELECT a.id, a.status, a.recorded_at, s.date, s.time, c.course_code, c.course_name
+    const result = await run('INSERT INTO attendance (user_id, status, session_id, student_name) VALUES (?, ?, ?, ?)', [userId, 'Present', session.id, student.username]);
+    const record = await query(`SELECT a.id, a.status, a.student_name, a.recorded_at, s.date, s.time, c.course_code, c.course_name
       FROM attendance a JOIN attendance_sessions s ON s.id = a.session_id JOIN courses c ON c.id = s.course_id WHERE a.id = ?`, [result.lastID]);
     res.status(201).json({ message: 'Attendance recorded.', attendanceId: result.lastID, session_id: session.id, recorded_at: record.recorded_at, record });
   } catch (e) { if (e.code === 'SQLITE_CONSTRAINT') return errorResponse(res, 409, 'You have already recorded attendance for this session.'); console.error(e); errorResponse(res, 500, 'Could not record attendance.'); }
@@ -121,7 +131,7 @@ app.get('/student/attendance', async (req, res) => {
   const userId = Number(req.query.user_id);
   if (!Number.isInteger(userId) || userId < 1) return errorResponse(res, 400, 'user_id is required.');
   try {
-    const records = await all(`SELECT a.id, a.status, a.recorded_at, s.date, s.time, c.course_code, c.course_name
+    const records = await all(`SELECT a.id, a.status, a.student_name, a.recorded_at, s.date, s.time, c.course_code, c.course_name
       FROM attendance a JOIN attendance_sessions s ON s.id = a.session_id JOIN courses c ON c.id = s.course_id
       WHERE a.user_id = ? ORDER BY a.recorded_at DESC`, [userId]);
     res.json({ records });
@@ -138,7 +148,7 @@ app.get('/lecturer/overview', async (req, res) => {
       (SELECT COUNT(*) FROM attendance a WHERE a.session_id = s.id) AS scan_count
       FROM attendance_sessions s JOIN courses c ON c.id = s.course_id
       WHERE c.lecturer_id = ? ORDER BY s.id DESC`, [lecturerId])).map(session => ({ ...session, token: new URL(`/student dashboard.html?session=${encodeURIComponent(session.token)}`, origin).toString() }));
-    const attendance = await all(`SELECT a.id, a.status, a.recorded_at, u.username, c.course_code, c.course_name, s.date, s.time
+    const attendance = await all(`SELECT a.id, a.status, a.student_name, a.recorded_at, u.username, u.email, c.course_code, c.course_name, s.id AS session_id, s.date, s.time
       FROM attendance a JOIN users u ON u.id = a.user_id
       LEFT JOIN attendance_sessions s ON s.id = a.session_id
       LEFT JOIN courses c ON c.id = s.course_id
