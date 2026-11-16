@@ -178,12 +178,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let qrScanner = null;
     let activeStream = null;
-    let uploadedSelfieData = null;
     window.addEventListener("pagehide", () => {
         activeStream?.getTracks().forEach(track => track.stop());
         if (qrScanner) qrScanner.stop().catch(() => {});
     });
-    document.getElementById("selfieUpload")?.addEventListener("change", event => { const file = event.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { uploadedSelfieData = reader.result; document.getElementById("captureMessage").textContent = "Selfie image selected. Verify your GPS to continue."; }; reader.readAsDataURL(file); });
 
     async function beginSecureScan(token) {
         const capture = document.getElementById("securityCapture");
@@ -201,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
             activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "user" }, width: { ideal: 720 }, height: { ideal: 720 } }, audio: false });
             video.srcObject = activeStream;
             await video.play().catch(() => {});
-        } catch (error) { captureMessage.textContent = "Camera unavailable. Upload a selfie image below to continue."; }
+        } catch (error) { captureMessage.textContent = "Camera could not start. Allow camera access and try again."; document.getElementById("captureSelfieButton").disabled = true; }
         document.getElementById("captureSelfieButton").onclick = async function () {
             const studentName = nameInput?.value.trim() || "";
             if (!studentName) { captureMessage.textContent = "Enter your full name to continue."; nameInput?.focus(); return; }
@@ -209,12 +207,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!navigator.geolocation) { captureMessage.textContent = "This browser does not support geolocation."; return; }
             navigator.geolocation.getCurrentPosition(async position => {
                 drawCampusMap(position.coords.latitude, position.coords.longitude);
-                const canvas = document.getElementById("selfieCanvas"); canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480; if (!uploadedSelfieData) { if (!activeStream) { captureMessage.textContent = "Capture a webcam selfie or upload an image first."; return; } canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height); } const selfieData = uploadedSelfieData || canvas.toDataURL("image/jpeg", .82);
+                const canvas = document.getElementById("selfieCanvas"); canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480; if (!activeStream) { captureMessage.textContent = "Camera access is required to capture your selfie."; return; } canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height); const selfieData = canvas.toDataURL("image/jpeg", .82);
                 try { const response = await fetch(`${window.SMARTATTEND_API_URL || window.location.origin}/attendance/scan`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, user_id: user.id, student_name: studentName, latitude: position.coords.latitude, longitude: position.coords.longitude, selfie_data: selfieData }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Attendance scan failed."); attendanceRecords.unshift(result.record); localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(attendanceRecords)); renderAttendanceRecords(); updateStatistics(); captureMessage.textContent = "Attendance recorded successfully."; if (scanMessage) scanMessage.textContent = "Present - attendance recorded for this class."; setTimeout(closeCapture, 1200); } catch (error) { captureMessage.textContent = error.message; }
             }, () => { captureMessage.textContent = "Location access is required. Enable GPS and try again."; }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
         };
         document.getElementById("cancelCaptureButton").onclick = closeCapture;
-        function closeCapture() { activeStream?.getTracks().forEach(track => track.stop()); activeStream = null; uploadedSelfieData = null; video.srcObject = null; document.getElementById("selfieUpload").value = ""; capture.hidden = true; }
+        function closeCapture() { activeStream?.getTracks().forEach(track => track.stop()); activeStream = null; video.srcObject = null; document.getElementById("captureSelfieButton").disabled = false; capture.hidden = true; }
     }
 
     if (scanButton) {
