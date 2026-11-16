@@ -11,7 +11,9 @@ const db = new sqlite3.Database(databasePath);
 const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(origin => origin.trim()).filter(Boolean);
 const isAllowedOrigin = origin => !origin || !allowedOrigins.length || allowedOrigins.includes(origin) || /^https:\/\/([a-z0-9-]+\.)?vercel\.app$/i.test(origin);
 app.use(cors(allowedOrigins.length ? { origin: (origin, callback) => callback(null, isAllowedOrigin(origin)) } : undefined));
-app.use(express.json({ limit: '32kb' }));
+// Mobile selfie captures are sent as base64 JSON. Keep this bounded, but large
+// enough for a compressed phone image instead of rejecting valid check-ins.
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(__dirname));
 
 db.serialize(() => {
@@ -187,7 +189,12 @@ app.post('/lecturer/create-session', async (req, res) => {
   } catch (e) { console.error(e); errorResponse(res, 500, 'Could not create attendance session.'); }
 });
 
-app.use((e, _req, res, _next) => e instanceof SyntaxError ? errorResponse(res, 400, 'Request body must be valid JSON.') : errorResponse(res, 500, 'Unexpected server error.'));
+app.use((e, _req, res, _next) => {
+  if (e?.type === 'entity.too.large') return errorResponse(res, 413, 'The captured image is too large. Please try again.');
+  if (e instanceof SyntaxError) return errorResponse(res, 400, 'Request body must be valid JSON.');
+  console.error(e);
+  return errorResponse(res, 500, 'Unexpected server error.');
+});
 if (require.main === module) app.listen(PORT, () => console.log(`SmartAttend API running on port ${PORT}`));
 
 module.exports = app;
