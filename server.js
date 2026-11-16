@@ -35,9 +35,11 @@ const validRoles = new Set(['student', 'lecturer']);
 const validStatuses = new Set(['Present', 'Absent', 'Late']);
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD || '').trim();
+const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || process.env.PUBLIC_API_URL || '').trim().replace(/\/$/, '');
 const adminTokens = new Set();
 const clean = value => typeof value === 'string' ? value.trim() : '';
 const qrToken = value => { try { return new URL(value, 'http://smartattend.local').searchParams.get('session') || value; } catch (_) { return value; } };
+const publicAppOrigin = req => PUBLIC_APP_URL || req.get('Origin') || `http://localhost:${PORT}`;
 const errorResponse = (res, status, error) => res.status(status).json({ error });
 const publicUser = row => ({ id: row.id, username: row.username, email: row.email, role: row.role });
 function query(sql, params = []) { return new Promise((resolve, reject) => db.get(sql, params, (e, row) => e ? reject(e) : resolve(row))); }
@@ -143,7 +145,7 @@ app.get('/lecturer/overview', async (req, res) => {
   if (!Number.isInteger(lecturerId) || lecturerId < 1) return errorResponse(res, 400, 'lecturer_id is required.');
   try {
     const courses = await all('SELECT id, course_code, course_name, lecturer_id FROM courses WHERE lecturer_id = ? ORDER BY course_code', [lecturerId]);
-    const origin = req.get('Origin') || `http://localhost:${PORT}`;
+    const origin = publicAppOrigin(req);
     const sessions = (await all(`SELECT s.id, s.course_id, c.course_code, c.course_name, s.date, s.time, s.token,
       (SELECT COUNT(*) FROM attendance a WHERE a.session_id = s.id) AS scan_count
       FROM attendance_sessions s JOIN courses c ON c.id = s.course_id
@@ -180,7 +182,7 @@ app.post('/lecturer/create-session', async (req, res) => {
     if (!course) return errorResponse(res, 404, 'Course not found for this lecturer.');
     const token = Buffer.from(JSON.stringify({ course_id: courseId, date, time, nonce: `${Date.now()}-${Math.random()}` })).toString('base64url');
     const result = await run('INSERT INTO attendance_sessions (course_id, date, time, token) VALUES (?, ?, ?, ?)', [courseId, date, time, token]);
-    const origin = req.get('Origin') || `http://localhost:${PORT}`;
+    const origin = publicAppOrigin(req);
     res.status(201).json({ message: 'Attendance session created.', session: { id: result.lastID, course_id: courseId, course_name: course.course_name, date, time, token: new URL(`/student dashboard.html?session=${encodeURIComponent(token)}`, origin).toString() } });
   } catch (e) { console.error(e); errorResponse(res, 500, 'Could not create attendance session.'); }
 });

@@ -17,6 +17,8 @@ services:
         sync: false
       - key: DB_PATH
         value: /var/data/database.db
+      - key: PUBLIC_APP_URL
+        value: https://smartattend-1-bptv.onrender.com
     disk:
       name: smartattend-data
       mountPath: /var/data
